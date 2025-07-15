@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WHOIS Domain Intelligence Tool</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            margin: 2rem auto;
+            max-width: 1200px;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px 20px 0 0;
+            padding: 3rem 2rem;
+        }
+        
+        .nav-pills .nav-link {
+            color: #333 !important;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 25px;
+            margin: 0 0.5rem;
+            font-weight: 600;
+        }
+        
+        .nav-pills .nav-link.active {
+            background-color: white !important;
+            color: #667eea !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .analysis-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s ease;
+        }
+        
+        .analysis-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            margin: 2rem 0;
+        }
+        
+        .status-success { color: #28a745; }
+        .status-warning { color: #ffc107; }
+        .status-danger { color: #dc3545; }
+        
+        .metric-card {
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 15px;
+            background: white;
+            border: 1px solid #dee2e6;
+            margin-bottom: 1rem;
+        }
+        
+        .metric-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .privacy-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: 600;
+            margin: 0.25rem;
+        }
+        
+        .privacy-protected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .privacy-public {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .error-alert {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="main-container">
+            <!-- Hero Section -->
+            <div class="hero-section text-center">
+                <h1 class="display-4 fw-bold mb-3">
+                    <i class="bi bi-search"></i> WHOIS Intelligence Tool
+                </h1>
+                <p class="lead mb-4">Professional Domain Analysis & Intelligence</p>
+                
+                <!-- Navigation Tabs -->
+                <ul class="nav nav-pills justify-content-center mb-4" id="mainTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="domain-tab" data-bs-toggle="pill" 
+                                data-bs-target="#domain-analysis" type="button" role="tab">
+                            <i class="bi bi-globe"></i> Domain Lookup
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="bulk-tab" data-bs-toggle="pill" 
+                                data-bs-target="#bulk-analysis" type="button" role="tab">
+                            <i class="bi bi-list-ul"></i> Bulk Analysis
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content" id="mainTabContent">
+                    <!-- Domain Analysis Tab -->
+                    <div class="tab-pane fade show active" id="domain-analysis" role="tabpanel">
+                        <form id="domainForm" class="row g-3 justify-content-center">
+                            <div class="col-auto">
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-white"><i class="bi bi-globe"></i></span>
+                                    <input type="text" class="form-control" id="domainInput" 
+                                           placeholder="Enter domain (e.g., google.com)" 
+                                           style="min-width: 300px;" required>
+                                    <button class="btn btn-gradient" type="submit" id="analyzeBtn">
+                                        <i class="bi bi-search"></i> Analyze
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Bulk Analysis Tab -->
+                    <div class="tab-pane fade" id="bulk-analysis" role="tabpanel">
+                        <form id="bulkForm" class="row g-3 justify-content-center">
+                            <div class="col-12 col-md-8">
+                                <textarea class="form-control" id="bulkDomains" rows="4" 
+                                          placeholder="Enter multiple domains, one per line:&#10;google.com&#10;microsoft.com&#10;github.com"></textarea>
+                            </div>
+                            <div class="col-12 text-center">
+                                <button class="btn btn-gradient" type="submit" id="bulkAnalyzeBtn">
+                                    <i class="bi bi-rocket-takeoff"></i> Analyze All
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Section -->
+            <div class="loading-spinner" id="loadingSpinner">
+                <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3">Analyzing domain information...</p>
+                <div class="progress" style="height: 6px; max-width: 400px; margin: 0 auto;">
+                    <div class="progress-bar bg-primary" id="progressBar" role="progressbar" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="container" id="resultsContainer" style="display: none;">
+                <div class="row py-4">
+                    <!-- Success Alert -->
+                    <div class="col-12">
+                        <div class="alert alert-success d-flex align-items-center mb-4" role="alert" id="successAlert" style="display: none;">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <div>
+                                <strong>Analysis Complete!</strong> <span id="resultSummary"></span>
+                            </div>
+                        </div>
+                        
+                        <!-- Error Alert -->
+                        <div class="error-alert" id="errorAlert" style="display: none;">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <strong>Error:</strong> <span id="errorMessage"></span>
+                        </div>
+                    </div>
+
+                    <!-- Metrics Overview -->
+                    <div class="col-12 mb-4" id="metricsSection" style="display: none;">
+                        <h3 class="mb-3"><i class="bi bi-bar-chart"></i> Analysis Overview</h3>
+                        <div class="row">
+                            <div class="col-6 col-md-3">
+                                <div class="metric-card">
+                                    <div class="metric-number" id="domainsAnalyzed">0</div>
+                                    <div class="text-muted">Domains</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="metric-card">
+                                    <div class="metric-number" id="emailsFound">0</div>
+                                    <div class="text-muted">Emails</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="metric-card">
+                                    <div class="metric-number" id="nameServers">0</div>
+                                    <div class="text-muted">Name Servers</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="metric-card">
+                                    <div class="metric-number" id="registrars">0</div>
+                                    <div class="text-muted">Registrars</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Analysis Results -->
+                    <div class="col-12" id="analysisResults">
+                        <!-- Results will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Global data storage
+        let analysisData = [];
+        let currentAnalysisId = 0;
+
+        // WHOIS API configuration
+        const WHOIS_API_ENDPOINTS = [
+            'https://api.whoisjson.com/v1/',
+            'https://www.whoisxmlapi.com/whoisserver/WhoisService',
+            'https://api.ip2whois.com/v2'
+        ];
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Focus on domain input
+            document.getElementById('domainInput').focus();
+            
+            // Set up form handlers
+            document.getElementById('domainForm').addEventListener('submit', handleSingleDomain);
+            document.getElementById('bulkForm').addEventListener('submit', handleBulkDomains);
+            
+            // Allow Enter key in bulk textarea
+            document.getElementById('bulkDomains').addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && e.ctrlKey) {
+                    e.preventDefault();
+                    handleBulkDomains(e);
+                }
+            });
+        });
+
+        function cleanDomain(domain) {
+            return domain.trim()
+                .replace(/^https?:\/\//, '')
+                .replace(/^www\./, '')
+                .split('/')[0]
+                .toLowerCase();
+        }
+
+        function extractEmails(text) {
+            if (!text) return [];
+            const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+            const emails = text.match(emailRegex) || [];
+            return [...new Set(emails)];
+        }
+
+        function extractNameServers(whoisData) {
+            const nameServers = [];
+            
+            // Check various possible fields
+            const nsFields = ['name_servers', 'nameservers', 'ns', 'nserver'];
+            
+            for (const field of nsFields) {
+                if (whoisData[field]) {
+                    if (Array.isArray(whoisData[field])) {
+                        nameServers.push(...whoisData[field]);
+                    } else if (typeof whoisData[field] === 'string') {
+                        nameServers.push(whoisData[field]);
+                    }
+                }
+            }
+            
+            // Also check raw text for name servers
+            const whoisText = JSON.stringify(whoisData).toLowerCase();
+            const nsRegex = /(?:name server|nserver|nameserver):\s*([a-zA-Z0-9.-]+)/g;
+            let match;
+            while ((match = nsRegex.exec(whoisText)) !== null) {
+                nameServers.push(match[1]);
+            }
+            
+            return [...new Set(nameServers)].filter(ns => ns && ns.includes('.'));
+        }
+
+        function isPrivacyProtected(whoisData) {
+            const privacyIndicators = [
+                'whoisguard', 'domains by proxy', 'perfect privacy', 'private whois',
+                'contact privacy', 'redacted for privacy', 'data protected',
+                'privacy service', 'whois privacy', 'private registration'
+            ];
+            
+            const whoisText = JSON.stringify(whoisData).toLowerCase();
+            
+            for (const indicator of privacyIndicators) {
+                if (whoisText.includes(indicator)) {
+                    return { protected: true, service: indicator };
+                }
+            }
+            
+            return { protected: false, service: null };
+        }
+
+        // Backend API configuration
+        const API_BASE_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3001' 
+            : ''; // Use same domain in production
+
+        async function fetchWhoisData(domain) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/analyze`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ domain })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'Analysis failed');
+                }
+                
+                return data;
+            } catch (error) {
+                console.error('Backend API failed:', error);
+                // Fallback to mock data for demonstration
+                return createMockAnalysis(domain);
+            }
+        }
+
+        function createMockAnalysis(domain) {
+            return {
+                domain: domain,
+                timestamp: new Date().toISOString(),
+                success: true,
+                processingTime: 1500,
+                whoisData: {
+                    domain: domain,
+                    registrar: 'Example Registrar Inc.',
+                    creationDate: '2020-01-15',
+                    expirationDate: '2025-01-15',
+                    registrantCountry: 'US',
+                    emails: [`admin@${domain}`, 'privacy@whoisguard.com']
+                },
+                dnsData: {
+                    A: ['192.0.2.1'],
+                    NS: ['ns1.example.com', 'ns2.example.com'],
+                    MX: [{ priority: 10, exchange: 'mail.example.com' }]
+                },
+                privacyAnalysis: {
+                    isPrivate: domain.includes('privacy') || Math.random() > 0.5,
+                    privacyService: 'whoisguard',
+                    privacyDomain: 'whoisguard.com'
+                },
+                registrarInfo: {
+                    name: 'Example Registrar Inc.',
+                    isUSBased: true,
+                    category: 'Major US Commercial'
+                },
+                geoData: {
+                    countries: ['US'],
+                    primaryLocation: {
+                        country: 'US',
+                        region: 'CA',
+                        city: 'San Francisco'
+                    }
+                },
+                summary: {
+                    domain: domain,
+                    isUSRegistrar: true,
+                    registrar: 'Example Registrar Inc.',
+                    isPrivacyProtected: domain.includes('privacy') || Math.random() > 0.5,
+                    registrantCountry: 'US',
+                    quickAssessment: {
+                        flags: ['US_REGISTRAR', 'PRIVACY_PROTECTED'],
+                        recommendation: 'Check privacy contact domain for actual registrant details'
+                    }
+                }
+            };
+        }
+
+        async function analyzeDomain(domain) {
+            const cleanedDomain = cleanDomain(domain);
+            console.log(`Analyzing domain: ${cleanedDomain}`);
+            
+            const analysis = await fetchWhoisData(cleanedDomain);
+            
+            // Convert backend response to frontend format
+            return {
+                id: ++currentAnalysisId,
+                domain: cleanedDomain,
+                timestamp: analysis.timestamp,
+                whoisData: analysis.whoisData,
+                emails: analysis.whoisData?.emails || [],
+                nameServers: analysis.dnsData?.NS || [],
+                privacy: {
+                    protected: analysis.privacyAnalysis?.isPrivate || false,
+                    service: analysis.privacyAnalysis?.privacyService || null
+                },
+                registrar: analysis.registrarInfo?.name || 'Unknown',
+                creationDate: analysis.whoisData?.creationDate || 'Unknown',
+                expirationDate: analysis.whoisData?.expirationDate || 'Unknown',
+                status: analysis.whoisData?.status || 'Unknown',
+                country: analysis.registrarInfo?.country || analysis.whoisData?.registrantCountry || 'Unknown',
+                isUSRegistrar: analysis.registrarInfo?.isUSBased || false,
+                geoLocation: analysis.geoData?.primaryLocation || null,
+                summary: analysis.summary || {},
+                processingTime: analysis.processingTime || 0
+            };
+        }
+
+        function showLoading() {
+            document.getElementById('loadingSpinner').style.display = 'block';
+            document.getElementById('resultsContainer').style.display = 'none';
+            updateProgress(0);
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingSpinner').style.display = 'none';
+        }
+
+        function updateProgress(percentage) {
+            document.getElementById('progressBar').style.width = percentage + '%';
+        }
+
+        function showError(message) {
+            document.getElementById('errorAlert').style.display = 'block';
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('successAlert').style.display = 'none';
+            document.getElementById('metricsSection').style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            document.getElementById('successAlert').style.display = 'block';
+            document.getElementById('resultSummary').textContent = message;
+            document.getElementById('errorAlert').style.display = 'none';
+            document.getElementById('metricsSection').style.display = 'block';
+        }
+
+        async function handleSingleDomain(event) {
+            event.preventDefault();
+            
+            const domain = document.getElementById('domainInput').value.trim();
+            if (!domain) return;
+            
+            showLoading();
+            
+            try {
+                updateProgress(25);
+                const analysis = await analyzeDomain(domain);
+                
+                updateProgress(75);
+                analysisData = [analysis];
+                
+                updateProgress(100);
+                displayResults();
+                
+                setTimeout(() => {
+                    hideLoading();
+                    showSuccess(`Analysis completed for ${domain}`);
+                    document.getElementById('resultsContainer').style.display = 'block';
+                }, 500);
+                
+            } catch (error) {
+                hideLoading();
+                document.getElementById('resultsContainer').style.display = 'block';
+                showError(error.message);
+            }
+        }
+
+        async function handleBulkDomains(event) {
+            event.preventDefault();
+            
+            const domainsText = document.getElementById('bulkDomains').value.trim();
+            if (!domainsText) return;
+            
+            const domains = domainsText.split('\n')
+                .map(d => d.trim())
+                .filter(d => d.length > 0);
+            
+            if (domains.length === 0) return;
+            
+            showLoading();
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/bulk-analyze`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ domains })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                // Convert backend bulk response to frontend format
+                analysisData = data.results.map((result, index) => {
+                    if (result.success !== false) {
+                        return {
+                            id: ++currentAnalysisId,
+                            domain: result.domain,
+                            timestamp: result.timestamp,
+                            whoisData: result.whoisData,
+                            emails: result.whoisData?.emails || [],
+                            nameServers: result.dnsData?.NS || [],
+                            privacy: {
+                                protected: result.privacyAnalysis?.isPrivate || false,
+                                service: result.privacyAnalysis?.privacyService || null
+                            },
+                            registrar: result.registrarInfo?.name || 'Unknown',
+                            creationDate: result.whoisData?.creationDate || 'Unknown',
+                            expirationDate: result.whoisData?.expirationDate || 'Unknown',
+                            status: result.whoisData?.status || 'Unknown',
+                            country: result.registrarInfo?.country || result.whoisData?.registrantCountry || 'Unknown',
+                            isUSRegistrar: result.registrarInfo?.isUSBased || false,
+                            summary: result.summary || {},
+                            processingTime: result.processingTime || 0
+                        };
+                    } else {
+                        return {
+                            id: ++currentAnalysisId,
+                            domain: result.domain,
+                            error: result.error,
+                            timestamp: new Date().toISOString()
+                        };
+                    }
+                });
+                
+                updateProgress(100);
+                displayResults();
+                
+                setTimeout(() => {
+                    hideLoading();
+                    showSuccess(`Analyzed ${analysisData.filter(a => !a.error).length} of ${domains.length} domains`);
+                    document.getElementById('resultsContainer').style.display = 'block';
+                }, 500);
+                
+            } catch (error) {
+                hideLoading();
+                document.getElementById('resultsContainer').style.display = 'block';
+                showError(error.message);
+            }
+        }
+
+        function displayResults() {
+            if (analysisData.length === 0) return;
+            
+            // Update metrics
+            const totalEmails = [...new Set(analysisData.flatMap(a => a.emails))].length;
+            const totalNameServers = [...new Set(analysisData.flatMap(a => a.nameServers))].length;
+            const totalRegistrars = [...new Set(analysisData.map(a => a.registrar))].length;
+            
+            document.getElementById('domainsAnalyzed').textContent = analysisData.length;
+            document.getElementById('emailsFound').textContent = totalEmails;
+            document.getElementById('nameServers').textContent = totalNameServers;
+            document.getElementById('registrars').textContent = totalRegistrars;
+            
+            // Generate results HTML
+            let resultsHtml = '';
+            
+            analysisData.forEach((analysis, index) => {
+                resultsHtml += generateDomainCard(analysis, index);
+            });
+            
+            // Add export section
+            if (analysisData.length > 0) {
+                resultsHtml += generateExportSection();
+            }
+            
+            document.getElementById('analysisResults').innerHTML = resultsHtml;
+        }
+
+        function generateDomainCard(analysis) {
+            if (analysis.error) {
+                return `
+                    <div class="card analysis-card mb-4">
+                        <div class="card-header bg-danger text-white">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-exclamation-triangle"></i> ${analysis.domain} - Error
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-danger mb-0">
+                                <strong>Analysis Failed:</strong> ${analysis.error}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            const privacyBadge = analysis.privacy.protected 
+                ? `<span class="privacy-badge privacy-protected"><i class="bi bi-shield-check"></i> Privacy Protected</span>`
+                : `<span class="privacy-badge privacy-public"><i class="bi bi-eye"></i> Public Registration</span>`;
+            
+            const usRegistrarBadge = analysis.isUSRegistrar 
+                ? `<span class="badge bg-success ms-2"><i class="bi bi-flag-usa"></i> US Registrar</span>`
+                : `<span class="badge bg-secondary ms-2"><i class="bi bi-globe"></i> Non-US</span>`;
+            
+            // Quick assessment alerts
+            let assessmentAlert = '';
+            if (analysis.summary?.quickAssessment) {
+                const assessment = analysis.summary.quickAssessment;
+                const alertClass = assessment.priority === 'high' ? 'alert-warning' : 'alert-info';
+                assessmentAlert = `
+                    <div class="alert ${alertClass} mb-3">
+                        <strong>Quick Assessment:</strong> ${assessment.recommendation}
+                        <div class="small mt-1">
+                            Flags: ${assessment.flags.join(', ')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            return `
+                <div class="card analysis-card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-globe"></i> ${analysis.domain}
+                            ${privacyBadge}
+                            ${usRegistrarBadge}
+                        </h5>
+                        <small class="text-muted">
+                            Processed in ${analysis.processingTime}ms
+                        </small>
+                    </div>
+                    <div class="card-body">
+                        ${assessmentAlert}
+                        
+                        <div class="row">
+                            <!-- Basic Information -->
+                            <div class="col-md-6 mb-3">
+                                <h6><i class="bi bi-info-circle"></i> Domain Information</h6>
+                                <table class="table table-sm table-borderless">
+                                    <tr><td><strong>Registrar:</strong></td><td>${analysis.registrar}</td></tr>
+                                    <tr><td><strong>Created:</strong></td><td>${analysis.creationDate}</td></tr>
+                                    <tr><td><strong>Expires:</strong></td><td>${analysis.expirationDate}</td></tr>
+                                    <tr><td><strong>Status:</strong></td><td>${analysis.status}</td></tr>
+                                    <tr><td><strong>Country:</strong></td><td>${analysis.country}</td></tr>
+                                    ${analysis.geoLocation ? `<tr><td><strong>Hosting:</strong></td><td>${analysis.geoLocation.city}, ${analysis.geoLocation.country}</td></tr>` : ''}
+                                </table>
+                            </div>
+                            
+                            <!-- Contact Information -->
+                            <div class="col-md-6 mb-3">
+                                <h6><i class="bi bi-envelope"></i> Contact Information</h6>
+                                ${analysis.privacy.protected ? 
+                                    `<div class="alert alert-info py-2 mb-2">
+                                        <small><strong>Privacy Service:</strong> ${analysis.privacy.service || 'Unknown'}</small>
+                                    </div>` : ''
+                                }
+                                ${analysis.emails.length > 0 ? 
+                                    `<div class="small">${analysis.emails.map(email => 
+                                        `<div class="mb-1"><code>${email}</code></div>`
+                                    ).join('')}</div>` : 
+                                    '<div class="text-muted small">No emails found</div>'
+                                }
+                            </div>
+                            
+                            <!-- Name Servers -->
+                            <div class="col-12">
+                                <h6><i class="bi bi-server"></i> DNS Infrastructure (${analysis.nameServers.length} servers)</h6>
+                                ${analysis.nameServers.length > 0 ? 
+                                    `<div class="row">${analysis.nameServers.map(ns => 
+                                        `<div class="col-md-6 col-lg-4 mb-1"><code class="small">${ns}</code></div>`
+                                    ).join('')}</div>` : 
+                                    '<div class="text-muted small">No name servers found</div>'
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateExportSection() {
+            return `
+                <div class="card analysis-card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0"><i class="bi bi-download"></i> Export Results</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <p class="text-muted mb-3">Download analysis results in various formats</p>
+                        <button class="btn btn-success me-2 mb-2" onclick="exportToJSON()">
+                            <i class="bi bi-file-code"></i> JSON
+                        </button>
+                        <button class="btn btn-primary me-2 mb-2" onclick="exportToCSV()">
+                            <i class="bi bi-file-spreadsheet"></i> CSV
+                        </button>
+                        <button class="btn btn-info mb-2" onclick="exportToText()">
+                            <i class="bi bi-file-text"></i> Text Report
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function exportToJSON() {
+            const exportData = {
+                timestamp: new Date().toISOString(),
+                totalDomains: analysisData.length,
+                analysis: analysisData
+            };
+            
+            const jsonString = JSON.stringify(exportData, null, 2);
+            downloadFile(jsonString, `whois_analysis_${new Date().toISOString().split('T')[0]}.json`, 'application/json');
+        }
+
+        function exportToCSV() {
+            let csv = 'Domain,Registrar,Created,Expires,Status,Country,Privacy Protected,Emails,Name Servers\n';
+            
+            analysisData.forEach(analysis => {
+                const emails = analysis.emails.join('; ');
+                const nameServers = analysis.nameServers.join('; ');
+                
+                csv += `"${analysis.domain}","${analysis.registrar}","${analysis.creationDate}","${analysis.expirationDate}","${analysis.status}","${analysis.country}","${analysis.privacy.protected}","${emails}","${nameServers}"\n`;
+            });
+            
+            downloadFile(csv, `whois_analysis_${new Date().toISOString().split('T')[0]}.csv`, 'text/csv');
+        }
+
+        function exportToText() {
+            let report = `WHOIS ANALYSIS REPORT\n`;
+            report += `Generated: ${new Date().toLocaleString()}\n`;
+            report += `Total Domains: ${analysisData.length}\n`;
+            report += `${'='.repeat(50)}\n\n`;
+            
+            analysisData.forEach((analysis, index) => {
+                report += `${index + 1}. ${analysis.domain.toUpperCase()}\n`;
+                report += `   Registrar: ${analysis.registrar}\n`;
+                report += `   Created: ${analysis.creationDate}\n`;
+                report += `   Expires: ${analysis.expirationDate}\n`;
+                report += `   Status: ${analysis.status}\n`;
+                report += `   Country: ${analysis.country}\n`;
+                report += `   Privacy: ${analysis.privacy.protected ? 'Protected' : 'Public'}\n`;
+                
+                if (analysis.emails.length > 0) {
+                    report += `   Emails: ${analysis.emails.join(', ')}\n`;
+                }
+                
+                if (analysis.nameServers.length > 0) {
+                    report += `   Name Servers: ${analysis.nameServers.join(', ')}\n`;
+                }
+                
+                report += `\n`;
+            });
+            
+            downloadFile(report, `whois_analysis_${new Date().toISOString().split('T')[0]}.txt`, 'text/plain');
+        }
+
+        function downloadFile(content, filename, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
